@@ -11,10 +11,10 @@ type AppNavProps = {
 
 const links: Array<{ href: Route; label: string }> = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/vocabulary", label: "Tu vung" },
-  { href: "/review", label: "On tap" },
+  { href: "/vocabulary", label: "Từ vựng" },
+  { href: "/review", label: "Ôn tập" },
   { href: "/quiz", label: "Quiz" },
-  { href: "/settings", label: "Cai dat" }
+  { href: "/settings", label: "Cài đặt" }
 ];
 
 export function AppNav({ isAuthenticated }: AppNavProps) {
@@ -46,15 +46,15 @@ export function AppNav({ isAuthenticated }: AppNavProps) {
       <div className="nav-actions">
         {isAuthenticated ? (
           <button className="ghost-button" onClick={handleLogout} disabled={loading}>
-            {loading ? "Dang xuat..." : "Dang xuat"}
+            {loading ? "Đang đăng xuất..." : "Đăng xuất"}
           </button>
         ) : (
           <>
             <Link href="/login" className="ghost-button">
-              Dang nhap
+              Đăng nhập
             </Link>
             <Link href="/register" className="primary-button small">
-              Tao tai khoan
+              Tạo tài khoản
             </Link>
           </>
         )}

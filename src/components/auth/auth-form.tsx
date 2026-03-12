@@ -33,7 +33,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     const data = await response.json();
 
     if (!response.ok) {
-      setError(data.error || "Co loi xay ra");
+      setError(data.error || "Có lỗi xảy ra");
       setLoading(false);
       return;
     }
@@ -45,18 +45,18 @@ export function AuthForm({ mode }: AuthFormProps) {
   return (
     <form className="panel auth-panel" onSubmit={handleSubmit}>
       <div>
-        <p className="eyebrow">{mode === "login" ? "Chao mung quay lai" : "Bat dau hoc ngay"}</p>
-        <h1>{mode === "login" ? "Dang nhap" : "Tao tai khoan"}</h1>
+        <p className="eyebrow">{mode === "login" ? "Chào mừng quay lại" : "Bắt đầu học ngay"}</p>
+        <h1>{mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}</h1>
       </div>
 
-      {mode === "register" ? <input name="name" placeholder="Ten hien thi" className="input" /> : null}
+      {mode === "register" ? <input name="name" placeholder="Tên hiển thị" className="input" /> : null}
       <input name="email" type="email" placeholder="Email" className="input" required />
-      <input name="password" type="password" placeholder="Mat khau" className="input" required />
+      <input name="password" type="password" placeholder="Mật khẩu" className="input" required />
 
       {error ? <p className="error-text">{error}</p> : null}
 
       <button className="primary-button" type="submit" disabled={loading}>
-        {loading ? "Dang xu ly..." : mode === "login" ? "Dang nhap" : "Tao tai khoan"}
+        {loading ? "Đang xử lý..." : mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
       </button>
     </form>
   );

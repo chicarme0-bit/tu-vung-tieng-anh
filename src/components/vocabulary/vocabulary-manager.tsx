@@ -56,7 +56,7 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
     const data = await response.json();
 
     if (!response.ok) {
-      setError(data.error || "Khong the tao tu vung");
+      setError(data.error || "Không thể tạo từ vựng");
       setSaving(false);
       return;
     }
@@ -87,7 +87,7 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
     const data = await response.json();
 
     if (!response.ok) {
-      setError(data.error || "Khong the tao tu voi Gemini");
+      setError(data.error || "Không thể tạo từ với Gemini");
       setGenerating(false);
       return;
     }
@@ -102,18 +102,18 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
     <div className="page-grid two-columns">
       <section className="panel stack-lg">
         <div>
-          <p className="eyebrow">Quan ly tu vung</p>
-          <h2>Them tu moi</h2>
+          <p className="eyebrow">Quản lý từ vựng</p>
+          <h2>Thêm từ mới</h2>
         </div>
         <form className="stack" onSubmit={handleCreate}>
-          <input name="english" className="input" placeholder="Tu tieng Anh" required />
-          <input name="vietnamese" className="input" placeholder="Nghia tieng Viet" required />
-          <input name="pronunciation" className="input" placeholder="Phien am" />
-          <input name="exampleEn" className="input" placeholder="Vi du tieng Anh" />
-          <input name="exampleVi" className="input" placeholder="Vi du tieng Viet" />
+          <input name="english" className="input" placeholder="Từ tiếng Anh" required />
+          <input name="vietnamese" className="input" placeholder="Nghĩa tiếng Việt" required />
+          <input name="pronunciation" className="input" placeholder="Phiên âm" />
+          <input name="exampleEn" className="input" placeholder="Ví dụ tiếng Anh" />
+          <input name="exampleVi" className="input" placeholder="Ví dụ tiếng Việt" />
           <div className="inline-fields">
             <select name="categoryId" className="input">
-              <option value="">Chon chu de</option>
+              <option value="">Chọn chủ đề</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -123,22 +123,22 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
             <input name="difficulty" type="number" min="1" max="5" defaultValue="1" className="input" />
           </div>
           <button className="primary-button" type="submit" disabled={saving}>
-            {saving ? "Dang luu..." : "Luu tu vung"}
+            {saving ? "Đang lưu..." : "Lưu từ vựng"}
           </button>
         </form>
       </section>
 
       <section className="panel stack-lg">
         <div>
-          <p className="eyebrow">AI ho tro</p>
-          <h2>Tao bo tu bang Gemini</h2>
+          <p className="eyebrow">AI hỗ trợ</p>
+          <h2>Tạo bộ từ bằng Gemini</h2>
         </div>
         <form className="stack" onSubmit={handleGenerate}>
-          <input name="topic" className="input" placeholder="Vi du: cong nghe, moi truong, marketing" required />
+          <input name="topic" className="input" placeholder="Ví dụ: công nghệ, môi trường, marketing" required />
           <div className="inline-fields">
             <input name="amount" type="number" min="1" max="20" defaultValue="5" className="input" />
             <select name="categoryId" className="input">
-              <option value="">Khong gan chu de</option>
+              <option value="">Không gán chủ đề</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -147,17 +147,17 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
             </select>
           </div>
           <button className="secondary-button" type="submit" disabled={generating}>
-            {generating ? "Dang tao..." : "Tao bang Gemini"}
+            {generating ? "Đang tạo..." : "Tạo bằng Gemini"}
           </button>
         </form>
-        {error ? <p className="error-text">{error}</p> : <p className="muted">Muon dung Gemini, hay luu API key o trang Cai dat.</p>}
+        {error ? <p className="error-text">{error}</p> : <p className="muted">Muốn dùng Gemini, hãy lưu API key ở trang Cài đặt.</p>}
       </section>
 
       <section className="panel table-panel span-full">
         <div className="section-header">
           <div>
-            <p className="eyebrow">Thu vien</p>
-            <h2>{items.length} tu vung hien co</h2>
+            <p className="eyebrow">Thư viện</p>
+            <h2>{items.length} từ vựng hiện có</h2>
           </div>
         </div>
         <div className="vocabulary-list">
@@ -165,7 +165,7 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
             <article key={item.id} className="vocabulary-card">
               <div className="word-row">
                 <strong>{item.english}</strong>
-                <span className="badge">{item.category?.name || "Chua phan loai"}</span>
+                <span className="badge">{item.category?.name || "Chưa phân loại"}</span>
               </div>
               <p>{item.vietnamese}</p>
               {item.pronunciation ? <p className="muted">{item.pronunciation}</p> : null}

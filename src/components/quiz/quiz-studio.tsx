@@ -49,7 +49,7 @@ export function QuizStudio({ categories }: QuizStudioProps) {
     const data = await response.json();
 
     if (!response.ok) {
-      setError(data.error || "Khong the tao quiz");
+      setError(data.error || "Không thể tạo quiz");
       setLoading(false);
       return;
     }
@@ -77,7 +77,7 @@ export function QuizStudio({ categories }: QuizStudioProps) {
     const data = await response.json();
 
     if (!response.ok) {
-      setError(data.error || "Khong the nop quiz");
+      setError(data.error || "Không thể nộp quiz");
       return;
     }
 
@@ -88,23 +88,23 @@ export function QuizStudio({ categories }: QuizStudioProps) {
     <div className="page-grid two-columns">
       <section className="panel stack-lg">
         <div>
-          <p className="eyebrow">Tu tao de</p>
-          <h1>Quiz Anh-Viet va Viet-Anh</h1>
+          <p className="eyebrow">Tự tạo đề</p>
+          <h1>Quiz Anh-Việt và Việt-Anh</h1>
         </div>
         <form className="stack" onSubmit={generateQuiz}>
           <div className="inline-fields">
             <select name="direction" className="input" defaultValue="EN_TO_VI">
-              <option value="EN_TO_VI">Anh sang Viet</option>
-              <option value="VI_TO_EN">Viet sang Anh</option>
+              <option value="EN_TO_VI">Anh sang Việt</option>
+              <option value="VI_TO_EN">Việt sang Anh</option>
             </select>
             <select name="mode" className="input" defaultValue="MULTIPLE_CHOICE">
-              <option value="MULTIPLE_CHOICE">Trac nghiem</option>
-              <option value="TYPING">Tu dien dap an</option>
+              <option value="MULTIPLE_CHOICE">Trắc nghiệm</option>
+              <option value="TYPING">Tự điền đáp án</option>
             </select>
           </div>
           <div className="inline-fields">
             <select name="categoryId" className="input" defaultValue="">
-              <option value="">Tat ca chu de</option>
+              <option value="">Tất cả chủ đề</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
@@ -112,35 +112,35 @@ export function QuizStudio({ categories }: QuizStudioProps) {
             <input name="count" type="number" className="input" min="1" max="20" defaultValue="5" />
           </div>
           <button className="primary-button" type="submit" disabled={loading}>
-            {loading ? "Dang tao quiz..." : "Tao quiz"}
+            {loading ? "Đang tạo quiz..." : "Tạo quiz"}
           </button>
         </form>
       </section>
 
       <section className="panel stack-lg">
         <div>
-          <p className="eyebrow">Ket qua</p>
-          <h2>{result ? `${result.score} diem` : "San sang lam bai"}</h2>
+          <p className="eyebrow">Kết quả</p>
+          <h2>{result ? `${result.score} điểm` : "Sẵn sàng làm bài"}</h2>
         </div>
-        {result ? <p className="success-text">Dung {result.correctAnswers}/{result.totalQuestions} cau.</p> : <p className="muted">Tao de ben trai de bat dau.</p>}
+        {result ? <p className="success-text">Đúng {result.correctAnswers}/{result.totalQuestions} câu.</p> : <p className="muted">Tạo đề bên trái để bắt đầu.</p>}
         {error ? <p className="error-text">{error}</p> : null}
       </section>
 
       <section className="panel stack-lg span-full">
         <div className="section-header">
           <div>
-            <p className="eyebrow">Bai lam</p>
-            <h2>{questions.length ? `${questions.length} cau hoi` : "Chua co cau hoi nao"}</h2>
+            <p className="eyebrow">Bài làm</p>
+            <h2>{questions.length ? `${questions.length} câu hỏi` : "Chưa có câu hỏi nào"}</h2>
           </div>
           {questions.length ? (
-            <button className="secondary-button" onClick={submitQuiz}>Nop bai</button>
+            <button className="secondary-button" onClick={submitQuiz}>Nộp bài</button>
           ) : null}
         </div>
 
         <div className="stack-lg">
           {questions.map((question, index) => (
             <article key={question.vocabularyId} className="quiz-card">
-              <p className="muted">Cau {index + 1}</p>
+              <p className="muted">Câu {index + 1}</p>
               <h3>{question.questionText}</h3>
               {config.mode === "MULTIPLE_CHOICE" ? (
                 <div className="choice-grid">
@@ -158,12 +158,12 @@ export function QuizStudio({ categories }: QuizStudioProps) {
               ) : (
                 <input
                   className="input"
-                  placeholder="Nhap dap an"
+                  placeholder="Nhập đáp án"
                   value={answers[question.vocabularyId] || ""}
                   onChange={(event) => setAnswers((current) => ({ ...current, [question.vocabularyId]: event.target.value }))}
                 />
               )}
-              {question.explanation ? <p className="muted">Goi y: {question.explanation}</p> : null}
+              {question.explanation ? <p className="muted">Gợi ý: {question.explanation}</p> : null}
             </article>
           ))}
         </div>

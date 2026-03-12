@@ -7,7 +7,7 @@ type SettingsPanelProps = {
 };
 
 export function SettingsPanel({ currentHint }: SettingsPanelProps) {
-  const [status, setStatus] = useState<string | null>(currentHint ? `API key dang luu: ${currentHint}` : null);
+  const [status, setStatus] = useState<string | null>(currentHint ? `API key đang lưu: ${currentHint}` : null);
   const [loading, setLoading] = useState(false);
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
@@ -23,12 +23,12 @@ export function SettingsPanel({ currentHint }: SettingsPanelProps) {
     const data = await response.json();
 
     if (!response.ok) {
-      setStatus(data.error || "Khong the luu API key");
+      setStatus(data.error || "Không thể lưu API key");
       setLoading(false);
       return;
     }
 
-    setStatus("Da luu Gemini API key an toan o server.");
+    setStatus("Đã lưu Gemini API key an toàn ở server.");
     setLoading(false);
     event.currentTarget.reset();
   }
@@ -36,16 +36,16 @@ export function SettingsPanel({ currentHint }: SettingsPanelProps) {
   return (
     <section className="panel stack-lg settings-panel">
       <div>
-        <p className="eyebrow">Tich hop AI</p>
-        <h1>Cai dat Gemini</h1>
+        <p className="eyebrow">Tích hợp AI</p>
+        <h1>Cài đặt Gemini</h1>
       </div>
       <form className="stack" onSubmit={handleSave}>
-        <input name="apiKey" className="input" type="password" placeholder="Nhap Gemini API key" required />
+        <input name="apiKey" className="input" type="password" placeholder="Nhập Gemini API key" required />
         <button className="primary-button" type="submit" disabled={loading}>
-          {loading ? "Dang luu..." : "Luu API key"}
+          {loading ? "Đang lưu..." : "Lưu API key"}
         </button>
       </form>
-      <p className="muted">Key duoc ma hoa o backend bang khoa rieng cua server va chi dung de goi Gemini tu server-side.</p>
+      <p className="muted">Key được mã hóa ở backend bằng khóa riêng của server và chỉ dùng để gọi Gemini từ server-side.</p>
       {status ? <p className="success-text">{status}</p> : null}
     </section>
   );

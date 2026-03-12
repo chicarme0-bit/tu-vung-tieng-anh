@@ -19,10 +19,10 @@ type ReviewItem = {
 };
 
 const reviewActions = [
-  { value: "AGAIN", label: "Again", hint: "lap lai som" },
-  { value: "HARD", label: "Hard", hint: "giu nhip ngan" },
-  { value: "GOOD", label: "Good", hint: "day lich ra vua phai" },
-  { value: "EASY", label: "Easy", hint: "day lich ra xa hon" }
+  { value: "AGAIN", label: "Again", hint: "lặp lại sớm" },
+  { value: "HARD", label: "Hard", hint: "giữ nhịp ngắn" },
+  { value: "GOOD", label: "Good", hint: "đẩy lịch ra vừa phải" },
+  { value: "EASY", label: "Easy", hint: "đẩy lịch ra xa hơn" }
 ] as const;
 
 export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
@@ -39,8 +39,8 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
     return (
       <section className="panel stack-lg review-panel">
         <p className="eyebrow">Flashcard</p>
-        <h1>Hang doi da xong</h1>
-        <p className="muted">Ban da xu ly het the den lich. Co the quay lai quiz de tiep tuc cuong hoa tri nho.</p>
+        <h1>Hàng đợi đã xong</h1>
+        <p className="muted">Bạn đã xử lý hết thẻ đến lịch. Có thể quay lại quiz để tiếp tục củng cố trí nhớ.</p>
       </section>
     );
   }
@@ -57,12 +57,12 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
     const data = await response.json();
 
     if (response.ok) {
-      setMessage(`The nay se quay lai sau ${data.nextReviewLabel}. Trang thai moi: ${data.progress.state}.`);
+      setMessage(`Thẻ này sẽ quay lại sau ${data.nextReviewLabel}. Trạng thái mới: ${data.progress.state}.`);
       setFlipped(false);
       setQueue((itemsInQueue) => itemsInQueue.filter((item) => item.id !== current.id));
       setIndex(0);
     } else {
-      setMessage(data.error || "Khong the luu ket qua on tap.");
+      setMessage(data.error || "Không thể lưu kết quả ôn tập.");
     }
 
     setSubmitting(false);
@@ -73,33 +73,33 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
       <div className="section-header">
         <div>
           <p className="eyebrow">Spaced repetition</p>
-          <h1>On tap theo lich thong minh</h1>
+          <h1>Ôn tập theo lịch thông minh</h1>
         </div>
-        <span className="badge">{dueCount} the den lich</span>
+        <span className="badge">{dueCount} thẻ đến lịch</span>
       </div>
 
       <div className="review-stats-grid">
         <article className="metric-card">
-          <p className="muted">Trang thai</p>
+          <p className="muted">Trạng thái</p>
           <strong>{current.state}</strong>
         </article>
         <article className="metric-card">
-          <p className="muted">Lan on</p>
+          <p className="muted">Lần ôn</p>
           <strong>{current.totalReviews}</strong>
         </article>
         <article className="metric-card">
-          <p className="muted">Dung lien tiep</p>
+          <p className="muted">Đúng liên tiếp</p>
           <strong>{current.consecutiveCorrect}</strong>
         </article>
         <article className="metric-card">
-          <p className="muted">So lan quen</p>
+          <p className="muted">Số lần quên</p>
           <strong>{current.lapses}</strong>
         </article>
       </div>
 
       <button type="button" className={flipped ? "flashcard flipped" : "flashcard"} onClick={() => setFlipped((value) => !value)}>
         <div>
-          <p className="muted">{flipped ? "Tieng Viet" : "Tieng Anh"}</p>
+          <p className="muted">{flipped ? "Tiếng Việt" : "Tiếng Anh"}</p>
           <h2>{flipped ? current.vietnamese : current.english}</h2>
           {current.pronunciation ? <p>{current.pronunciation}</p> : null}
           {current.exampleEn ? <p className="muted">{current.exampleEn}</p> : null}
@@ -117,12 +117,12 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
       </div>
 
       <p className="muted">
-        {current.isDue ? "The nay da den lich on." : "The moi duoc chen vao hang doi de ban khoi dong bo nho."}
+        {current.isDue ? "Thẻ này đã đến lịch ôn." : "Thẻ mới được chèn vào hàng đợi để bạn khởi động bộ nhớ."}
         {" "}
-        Neu ban lam dung o quiz, he thong cung se day lich on ra xa hon.
+        Nếu bạn làm đúng ở quiz, hệ thống cũng sẽ đẩy lịch ôn ra xa hơn.
       </p>
 
-      {message ? <p className={message.startsWith("Khong") ? "error-text" : "success-text"}>{message}</p> : null}
+      {message ? <p className={message.startsWith("Không") ? "error-text" : "success-text"}>{message}</p> : null}
     </section>
   );
 }
