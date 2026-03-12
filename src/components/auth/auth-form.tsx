@@ -24,22 +24,27 @@ export function AuthForm({ mode }: AuthFormProps) {
       name: String(formData.get("name") || "")
     };
 
-    const response = await fetch(`/api/auth/${mode}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const response = await fetch(`/api/auth/${mode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      setError(data.error || "Có lỗi xảy ra");
+      if (!response.ok) {
+        setError(data.error || "Có lỗi xảy ra");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Không thể kết nối tới máy chủ");
       setLoading(false);
-      return;
     }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
@@ -53,6 +58,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       <input name="email" type="email" placeholder="Email" className="input" required />
       <input name="password" type="password" placeholder="Mật khẩu" className="input" required />
 
+      {mode === "register" ? <p className="muted">Tối thiểu 6 ký tự. Sau khi tạo xong, bạn sẽ được chuyển thẳng vào dashboard.</p> : null}
       {error ? <p className="error-text">{error}</p> : null}
 
       <button className="primary-button" type="submit" disabled={loading}>

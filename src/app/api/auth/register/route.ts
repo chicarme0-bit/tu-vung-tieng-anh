@@ -11,36 +11,44 @@ export async function POST(request: Request) {
     const parsed = registerSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid registration data" }, { status: 400 });
+      return NextResponse.json({ error: "Dữ liệu đăng ký không hợp lệ" }, { status: 400 });
     }
 
+    const email = parsed.data.email.trim().toLowerCase();
     const existingUser = await prisma.user.findUnique({
-      where: { email: parsed.data.email }
+      where: { email }
     });
 
     if (existingUser) {
-      return NextResponse.json({ error: "Email already exists" }, { status: 409 });
+      return NextResponse.json({ error: "Email này đã được sử dụng" }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(parsed.data.password, 10);
     const user = await prisma.user.create({
       data: {
-        email: parsed.data.email,
+        email,
         passwordHash,
-        name: parsed.data.name || null,
-        settings: {
-          create: {}
-        },
-        streak: {
-          create: {}
-        }
+        name: parsed.data.name?.trim() || null
       }
+    });
+
+    await prisma.userSetting.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id }
+    });
+
+    await prisma.userStreak.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id }
     });
 
     await createSession(user.id);
 
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "Could not create account" }, { status: 500 });
+    return NextResponse.json({ ok: true, message: "Tạo tài khoản thành công" });
+  } catch (error) {
+    console.error("REGISTER_ERROR", error);
+    return NextResponse.json({ error: "Không thể tạo tài khoản lúc này" }, { status: 500 });
   }
 }

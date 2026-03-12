@@ -32,7 +32,8 @@ body {
     radial-gradient(circle at top right, rgba(27, 127, 106, 0.2), transparent 28%),
     linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
   color: var(--text);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  line-height: 1.6;
 }
 
 a {
@@ -42,13 +43,22 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
 button {
   cursor: pointer;
   border: 0;
+}
+
+h1,
+h2,
+h3,
+.brand {
+  font-family: var(--font-heading), Georgia, serif;
+  letter-spacing: -0.02em;
 }
 
 .app-shell {
@@ -74,8 +84,8 @@ button {
 
 .brand {
   font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 .nav {
@@ -97,6 +107,7 @@ button {
   padding: 10px 14px;
   border-radius: 999px;
   color: var(--muted);
+  font-weight: 500;
 }
 
 .nav-link.active,
@@ -136,13 +147,13 @@ button {
 
 .hero-copy h1 {
   font-size: clamp(2.6rem, 4vw, 4.8rem);
-  line-height: 0.98;
+  line-height: 1.02;
   max-width: 10ch;
 }
 
 .lead {
   font-size: 1.08rem;
-  line-height: 1.7;
+  line-height: 1.8;
   color: var(--muted);
   max-width: 58ch;
 }
@@ -152,7 +163,8 @@ button {
   color: var(--secondary);
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .panel {
@@ -197,8 +209,9 @@ button {
 .metric-value {
   display: block;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 800;
   margin-top: 8px;
+  font-family: var(--font-heading), Georgia, serif;
 }
 
 .primary-button,
@@ -217,6 +230,7 @@ button {
   align-items: center;
   min-height: 48px;
   padding: 0 18px;
+  font-weight: 600;
 }
 
 .primary-button {
@@ -289,6 +303,7 @@ select.input {
   background: rgba(241, 184, 91, 0.24);
   color: #6d4a11;
   border-radius: 999px;
+  font-weight: 600;
 }
 
 .page-grid.two-columns,

@@ -11,27 +11,41 @@ export async function POST(request: Request) {
     const parsed = loginSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid login data" }, { status: 400 });
+      return NextResponse.json({ error: "Dữ liệu đăng nhập không hợp lệ" }, { status: 400 });
     }
 
+    const email = parsed.data.email.trim().toLowerCase();
     const user = await prisma.user.findUnique({
-      where: { email: parsed.data.email }
+      where: { email }
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+      return NextResponse.json({ error: "Email hoặc mật khẩu không đúng" }, { status: 401 });
     }
 
     const matches = await bcrypt.compare(parsed.data.password, user.passwordHash);
 
     if (!matches) {
-      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+      return NextResponse.json({ error: "Email hoặc mật khẩu không đúng" }, { status: 401 });
     }
+
+    await prisma.userSetting.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id }
+    });
+
+    await prisma.userStreak.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id }
+    });
 
     await createSession(user.id);
 
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "Could not sign in" }, { status: 500 });
+    return NextResponse.json({ ok: true, message: "Đăng nhập thành công" });
+  } catch (error) {
+    console.error("LOGIN_ERROR", error);
+    return NextResponse.json({ error: "Không thể đăng nhập lúc này" }, { status: 500 });
   }
 }
