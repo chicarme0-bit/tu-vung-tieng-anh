@@ -1,0 +1,207 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String                 @id @default(cuid())
+  email        String                 @unique
+  passwordHash String
+  name         String?
+  avatarUrl    String?
+  language     String                 @default("vi")
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  settings     UserSetting?
+  vocabularies Vocabulary[]
+  attempts     QuizAttempt[]
+  reviewLogs   ReviewLog[]
+  wordProgress UserVocabularyProgress[]
+  streak       UserStreak?
+}
+
+model UserSetting {
+  id                    String        @id @default(cuid())
+  userId                String        @unique
+  geminiApiKeyEncrypted String?
+  geminiKeyHint         String?
+  dailyGoal             Int           @default(10)
+  quizDirectionDefault  QuizDirection @default(EN_TO_VI)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  description  String?
+  isSystem     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  vocabularies Vocabulary[]
+  attempts     QuizAttempt[]
+}
+
+model Vocabulary {
+  id              String                   @id @default(cuid())
+  userId          String?
+  categoryId      String?
+  english         String
+  vietnamese      String
+  pronunciation   String?
+  exampleEn       String?
+  exampleVi       String?
+  source          VocabularySource         @default(MANUAL)
+  difficulty      Int                      @default(1)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  user            User?                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        Category?                @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  reviewLogs      ReviewLog[]
+  quizItems       QuizAttemptItem[]
+  progressRecords UserVocabularyProgress[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([english])
+  @@index([vietnamese])
+}
+
+model UserVocabularyProgress {
+  id                 String       @id @default(cuid())
+  userId             String
+  vocabularyId       String
+  state              ReviewState  @default(NEW)
+  dueAt              DateTime     @default(now())
+  lastReviewedAt     DateTime?
+  intervalDays       Float        @default(0)
+  easeFactor         Float        @default(2.5)
+  stability          Float        @default(0)
+  difficultyScore    Float        @default(5)
+  totalReviews       Int          @default(0)
+  consecutiveCorrect Int          @default(0)
+  lapses             Int          @default(0)
+  lastResult         ReviewResult?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, vocabularyId])
+  @@index([userId, dueAt])
+  @@index([vocabularyId])
+  @@index([userId, state])
+}
+
+model ReviewLog {
+  id           String       @id @default(cuid())
+  userId       String
+  vocabularyId String
+  reviewedAt   DateTime     @default(now())
+  result       ReviewResult
+  source       ReviewSource @default(REVIEW)
+  stateBefore  ReviewState?
+  stateAfter   ReviewState?
+  easeScore    Int?
+  nextReviewAt DateTime?
+  intervalDays Float        @default(0)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, nextReviewAt])
+  @@index([vocabularyId])
+  @@index([userId, reviewedAt])
+}
+
+model QuizAttempt {
+  id             String        @id @default(cuid())
+  userId         String
+  direction      QuizDirection
+  mode           QuizMode      @default(MULTIPLE_CHOICE)
+  categoryId     String?
+  totalQuestions Int
+  correctAnswers Int
+  score          Int
+  createdAt      DateTime      @default(now())
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  items    QuizAttemptItem[]
+
+  @@index([userId, createdAt])
+  @@index([categoryId])
+}
+
+model QuizAttemptItem {
+  id            String    @id @default(cuid())
+  attemptId     String
+  vocabularyId  String?
+  questionText  String
+  correctAnswer String
+  userAnswer    String?
+  isCorrect     Boolean
+  explanation   String?
+  createdAt     DateTime  @default(now())
+
+  attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  vocabulary Vocabulary? @relation(fields: [vocabularyId], references: [id], onDelete: SetNull)
+
+  @@index([attemptId])
+  @@index([vocabularyId])
+}
+
+model UserStreak {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  lastStudyDate DateTime?
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum QuizDirection {
+  EN_TO_VI
+  VI_TO_EN
+}
+
+enum QuizMode {
+  MULTIPLE_CHOICE
+  TYPING
+}
+
+enum VocabularySource {
+  SYSTEM
+  MANUAL
+  GEMINI
+}
+
+enum ReviewResult {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+}
+
+enum ReviewState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+}
+
+enum ReviewSource {
+  REVIEW
+  QUIZ
+}
