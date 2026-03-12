@@ -3,7 +3,6 @@ import { Be_Vietnam_Pro, Literata } from "next/font/google";
 import Link from "next/link";
 
 import { AppNav } from "@/components/layout/app-nav";
-import { getSessionUser } from "@/lib/auth";
 
 import "./globals.css";
 
@@ -21,20 +20,18 @@ const headingFont = Literata({
 
 export const metadata: Metadata = {
   title: "Tu Vung Tieng Anh",
-  description: "MVP hoc tu vung tieng Anh voi on tap, quiz hai chieu va tich hop Gemini"
+  description: "MVP học từ vựng tiếng Anh với ôn tập, quiz hai chiều và tích hợp Gemini"
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const user = await getSessionUser();
-
   return (
     <html lang="vi">
       <body className={`${bodyFont.variable} ${headingFont.variable}`}>
         <div className="app-shell">
-          <AppNav isAuthenticated={Boolean(user)} />
+          <AppNav isAuthenticated />
           <main className="main-content">{children}</main>
           <footer className="footer">
-            <p>Học từ vựng thông minh cho người Việt, có AI hỗ trợ và lưu tiến độ theo tài khoản.</p>
+            <p>Học từ vựng thông minh cho người Việt, có AI hỗ trợ và có thể dùng ngay không cần tài khoản.</p>
             <Link href="/dashboard">Vào dashboard</Link>
           </footer>
         </div>

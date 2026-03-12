@@ -1,22 +1,18 @@
 import Link from "next/link";
 
-import { getSessionUser } from "@/lib/auth";
-
 export default async function HomePage() {
-  const user = await getSessionUser();
-
   return (
     <section className="hero-layout">
       <div className="hero-copy">
         <p className="eyebrow">English Vocabulary Platform</p>
-        <h1>Học từ vựng bằng flashcard, quiz hai chiều và Gemini theo từng tài khoản.</h1>
+        <h1>Học từ vựng bằng flashcard, quiz hai chiều và Gemini mà không cần đăng nhập.</h1>
         <p className="lead">
-          MVP này tập trung vào luồng học đơn giản: lưu từ vựng, ôn tập theo nhịp riêng, quiz Anh-Việt và Việt-Anh,
-          theo dõi streak, và dùng Gemini API key cá nhân để tạo nội dung động.
+          Phiên bản này tập trung vào trải nghiệm dùng ngay: lưu từ vựng, ôn tập theo nhịp riêng, quiz Anh-Việt và Việt-Anh,
+          theo dõi tiến độ và dùng Gemini để tạo nội dung động mà không cần tạo tài khoản.
         </p>
         <div className="action-row">
-          <Link href={user ? "/dashboard" : "/register"} className="primary-button">
-            {user ? "Mở dashboard" : "Bắt đầu miễn phí"}
+          <Link href="/dashboard" className="primary-button">
+            Mở dashboard
           </Link>
           <Link href="/quiz" className="secondary-button">
             Xem quiz demo
@@ -36,15 +32,15 @@ export default async function HomePage() {
           </article>
           <article className="metric-card">
             <span className="metric-value">1</span>
-            <p>API key Gemini riêng cho từng user</p>
+            <p>Chế độ dùng ngay không cần tài khoản</p>
           </article>
           <article className="metric-card">
-            <span className="metric-value">7d</span>
-            <p>Session cookie server-side</p>
+            <span className="metric-value">24/7</span>
+            <p>Truy cập trực tiếp vào toàn bộ tính năng</p>
           </article>
           <article className="metric-card">
-            <span className="metric-value">AES</span>
-            <p>Mã hóa key trước khi lưu</p>
+            <span className="metric-value">AI</span>
+            <p>Tạo từ mới và câu hỏi nhanh bằng Gemini</p>
           </article>
         </div>
       </div>

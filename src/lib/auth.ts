@@ -1,52 +1,59 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
 import { prisma } from "@/lib/prisma";
 
-const COOKIE_NAME = "tvta_session";
+const GUEST_EMAIL = "guest@tvta.local";
+const GUEST_PASSWORD_HASH = "guest-mode-disabled";
 
-export async function createSession(userId: string) {
-  const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, userId, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7
+async function ensureGuestUser() {
+  const user = await prisma.user.upsert({
+    where: { email: GUEST_EMAIL },
+    update: {
+      name: "Khách"
+    },
+    create: {
+      email: GUEST_EMAIL,
+      passwordHash: GUEST_PASSWORD_HASH,
+      name: "Khách"
+    }
+  });
+
+  await prisma.userSetting.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: { userId: user.id }
+  });
+
+  await prisma.userStreak.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: { userId: user.id }
+  });
+
+  return prisma.user.findUnique({
+    where: { id: user.id },
+    include: {
+      settings: true,
+      streak: true
+    }
   });
 }
 
+export async function createSession() {
+  return null;
+}
+
 export async function clearSession() {
-  const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  return null;
 }
 
 export async function getSessionUser() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get(COOKIE_NAME)?.value;
-
-  if (!userId) {
-    return null;
-  }
-
-  try {
-    return await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        settings: true,
-        streak: true
-      }
-    });
-  } catch {
-    return null;
-  }
+  return ensureGuestUser();
 }
 
 export async function requireSessionUser() {
-  const user = await getSessionUser();
+  const user = await ensureGuestUser();
 
   if (!user) {
-    redirect("/login");
+    throw new Error("Không thể khởi tạo người dùng mặc định");
   }
 
   return user;

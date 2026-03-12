@@ -4,6 +4,8 @@ import { ReviewTrainer } from "@/components/review/review-trainer";
 import { requireSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function ReviewPage() {
   const user = await requireSessionUser();
   const dueProgress = await prisma.userVocabularyProgress.findMany({

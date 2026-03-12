@@ -4,6 +4,8 @@ import { VocabularyManager } from "@/components/vocabulary/vocabulary-manager";
 import { requireSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function VocabularyPage() {
   const user = await requireSessionUser();
   const [items, categories] = await Promise.all([

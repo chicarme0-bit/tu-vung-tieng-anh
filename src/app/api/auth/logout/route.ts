@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { clearSession } from "@/lib/auth";
-
 export async function POST() {
-  await clearSession();
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    message: "Website hiện dùng chế độ không cần tài khoản."
+  });
 }
