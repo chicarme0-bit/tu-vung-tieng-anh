@@ -1,12 +1,8 @@
 import { QuizStudio } from "@/components/quiz/quiz-studio";
-import { requireSessionUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { demoCategories } from "@/lib/demo-data";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
-export default async function QuizPage() {
-  await requireSessionUser();
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
-
-  return <QuizStudio categories={categories} />;
+export default function QuizPage() {
+  return <QuizStudio categories={demoCategories} />;
 }

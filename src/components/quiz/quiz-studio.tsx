@@ -1,6 +1,8 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
+
+import { demoVocabulary } from "@/lib/demo-data";
 
 type Category = {
   id: string;
@@ -27,6 +29,20 @@ export function QuizStudio({ categories }: QuizStudioProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const sourceWords = useMemo(
+    () => demoVocabulary.filter((item) => !config.categoryId || item.categoryId === config.categoryId),
+    [config.categoryId]
+  );
+
+  function generateOptions(correctAnswer: string, currentId: string) {
+    const distractors = demoVocabulary
+      .filter((item) => item.id !== currentId)
+      .map((item) => (config.direction === "EN_TO_VI" ? item.vietnamese : item.english))
+      .slice(0, 3);
+
+    return [correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
+  }
+
   async function generateQuiz(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
@@ -37,51 +53,40 @@ export function QuizStudio({ categories }: QuizStudioProps) {
     const payload = {
       direction: String(formData.get("direction") || "EN_TO_VI"),
       mode: String(formData.get("mode") || "MULTIPLE_CHOICE"),
-      categoryId: String(formData.get("categoryId") || "") || undefined,
+      categoryId: String(formData.get("categoryId") || ""),
       count: Number(formData.get("count") || 5)
     };
 
-    const response = await fetch("/api/quiz/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    const words = demoVocabulary
+      .filter((item) => !payload.categoryId || item.categoryId === payload.categoryId)
+      .slice(0, payload.count);
+
+    const nextQuestions = words.map((word) => {
+      const questionText = payload.direction === "EN_TO_VI" ? word.english : word.vietnamese;
+      const correctAnswer = payload.direction === "EN_TO_VI" ? word.vietnamese : word.english;
+
+      return {
+        vocabularyId: word.id,
+        questionText,
+        correctAnswer,
+        options: payload.mode === "MULTIPLE_CHOICE" ? generateOptions(correctAnswer, word.id) : undefined,
+        explanation: word.exampleEn || word.exampleVi
+      };
     });
-    const data = await response.json();
 
-    if (!response.ok) {
-      setError(data.error || "Không thể tạo quiz");
-      setLoading(false);
-      return;
-    }
-
-    setConfig({ ...payload, categoryId: payload.categoryId || "" });
-    setQuestions(data.questions);
+    setConfig(payload);
+    setQuestions(nextQuestions);
     setAnswers({});
     setLoading(false);
   }
 
   async function submitQuiz() {
-    const response = await fetch("/api/quiz/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        direction: config.direction,
-        mode: config.mode,
-        categoryId: config.categoryId || undefined,
-        answers: questions.map((question) => ({
-          ...question,
-          userAnswer: answers[question.vocabularyId] || ""
-        }))
-      })
+    const correctAnswers = questions.filter((question) => (answers[question.vocabularyId] || "").trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()).length;
+    setResult({
+      score: Math.round((correctAnswers / Math.max(questions.length, 1)) * 100),
+      correctAnswers,
+      totalQuestions: questions.length
     });
-    const data = await response.json();
-
-    if (!response.ok) {
-      setError(data.error || "Không thể nộp quiz");
-      return;
-    }
-
-    setResult({ score: data.score, correctAnswers: data.correctAnswers, totalQuestions: data.totalQuestions });
   }
 
   return (
@@ -124,6 +129,7 @@ export function QuizStudio({ categories }: QuizStudioProps) {
         </div>
         {result ? <p className="success-text">Đúng {result.correctAnswers}/{result.totalQuestions} câu.</p> : <p className="muted">Tạo đề bên trái để bắt đầu.</p>}
         {error ? <p className="error-text">{error}</p> : null}
+        <p className="muted">Phiên bản demo này chấm điểm trực tiếp trên trình duyệt, không cần gọi API.</p>
       </section>
 
       <section className="panel stack-lg span-full">

@@ -30,7 +30,6 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
 
   const current = queue[index] ?? null;
   const dueCount = useMemo(() => queue.filter((item) => item.isDue).length, [queue]);
@@ -46,26 +45,10 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
   }
 
   async function submit(result: string) {
-    setSubmitting(true);
-    setMessage(null);
-
-    const response = await fetch("/api/review/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ vocabularyId: current.id, result })
-    });
-    const data = await response.json();
-
-    if (response.ok) {
-      setMessage(`Thẻ này sẽ quay lại sau ${data.nextReviewLabel}. Trạng thái mới: ${data.progress.state}.`);
-      setFlipped(false);
-      setQueue((itemsInQueue) => itemsInQueue.filter((item) => item.id !== current.id));
-      setIndex(0);
-    } else {
-      setMessage(data.error || "Không thể lưu kết quả ôn tập.");
-    }
-
-    setSubmitting(false);
+    setMessage(`Đã lưu lựa chọn ${result}. Trong bản demo này, tiến độ được xử lý ngay trên trình duyệt.`);
+    setFlipped(false);
+    setQueue((itemsInQueue) => itemsInQueue.filter((item) => item.id !== current.id));
+    setIndex(0);
   }
 
   return (
@@ -109,7 +92,7 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
 
       <div className="action-row">
         {reviewActions.map((action) => (
-          <button key={action.value} type="button" className="secondary-button review-action" onClick={() => submit(action.value)} disabled={submitting}>
+          <button key={action.value} type="button" className="secondary-button review-action" onClick={() => submit(action.value)}>
             <span>{action.label}</span>
             <small>{action.hint}</small>
           </button>
@@ -119,10 +102,10 @@ export function ReviewTrainer({ items }: { items: ReviewItem[] }) {
       <p className="muted">
         {current.isDue ? "Thẻ này đã đến lịch ôn." : "Thẻ mới được chèn vào hàng đợi để bạn khởi động bộ nhớ."}
         {" "}
-        Nếu bạn làm đúng ở quiz, hệ thống cũng sẽ đẩy lịch ôn ra xa hơn.
+        Phiên bản demo hiện lưu tương tác tại chỗ để website hoạt động ổn định trên Netlify.
       </p>
 
-      {message ? <p className={message.startsWith("Không") ? "error-text" : "success-text"}>{message}</p> : null}
+      {message ? <p className="success-text">{message}</p> : null}
     </section>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 type VocabularyItem = {
   id: string;
@@ -12,6 +11,7 @@ type VocabularyItem = {
   exampleVi: string | null;
   source: string;
   difficulty: number;
+  categoryId?: string;
   category: { name: string } | null;
 };
 
@@ -25,12 +25,25 @@ type VocabularyManagerProps = {
   categories: Category[];
 };
 
+const STORAGE_KEY = "tvta-demo-vocabulary";
+
 export function VocabularyManager({ initialItems, categories }: VocabularyManagerProps) {
-  const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+
+    if (saved) {
+      setItems(JSON.parse(saved));
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [items]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,33 +51,25 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const payload = {
+    const categoryId = String(formData.get("categoryId") || "");
+    const category = categories.find((item) => item.id === categoryId) ?? null;
+
+    const payload: VocabularyItem = {
+      id: `local-${Date.now()}`,
       english: String(formData.get("english") || ""),
       vietnamese: String(formData.get("vietnamese") || ""),
-      pronunciation: String(formData.get("pronunciation") || ""),
-      exampleEn: String(formData.get("exampleEn") || ""),
-      exampleVi: String(formData.get("exampleVi") || ""),
-      categoryId: String(formData.get("categoryId") || "") || undefined,
-      difficulty: Number(formData.get("difficulty") || 1)
+      pronunciation: String(formData.get("pronunciation") || "") || null,
+      exampleEn: String(formData.get("exampleEn") || "") || null,
+      exampleVi: String(formData.get("exampleVi") || "") || null,
+      categoryId: categoryId || undefined,
+      source: "MANUAL",
+      difficulty: Number(formData.get("difficulty") || 1),
+      category
     };
 
-    const response = await fetch("/api/vocabulary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json();
-
-    if (!response.ok) {
-      setError(data.error || "Không thể tạo từ vựng");
-      setSaving(false);
-      return;
-    }
-
-    setItems((current) => [data, ...current]);
+    setItems((current) => [payload, ...current]);
     setSaving(false);
     event.currentTarget.reset();
-    router.refresh();
   }
 
   async function handleGenerate(event: FormEvent<HTMLFormElement>) {
@@ -73,29 +78,27 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const payload = {
-      topic: String(formData.get("topic") || ""),
-      amount: Number(formData.get("amount") || 5),
-      categoryId: String(formData.get("categoryId") || "") || undefined
-    };
+    const topic = String(formData.get("topic") || "Chủ đề mới");
+    const amount = Number(formData.get("amount") || 5);
+    const categoryId = String(formData.get("categoryId") || "");
+    const category = categories.find((item) => item.id === categoryId) ?? null;
 
-    const response = await fetch("/api/gemini/generate-vocabulary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json();
+    const generated = Array.from({ length: amount }, (_, index) => ({
+      id: `gemini-demo-${Date.now()}-${index}`,
+      english: `${topic} word ${index + 1}`,
+      vietnamese: `Từ ${index + 1} về ${topic.toLowerCase()}`,
+      pronunciation: null,
+      exampleEn: `This is a demo example for ${topic} word ${index + 1}.`,
+      exampleVi: `Đây là ví dụ mô phỏng cho từ ${index + 1} về ${topic.toLowerCase()}.`,
+      categoryId: categoryId || undefined,
+      source: "GEMINI",
+      difficulty: 2,
+      category
+    }));
 
-    if (!response.ok) {
-      setError(data.error || "Không thể tạo từ với Gemini");
-      setGenerating(false);
-      return;
-    }
-
-    setItems((current) => [...data.items, ...current]);
+    setItems((current) => [...generated, ...current]);
     setGenerating(false);
     event.currentTarget.reset();
-    router.refresh();
   }
 
   return (
@@ -147,10 +150,10 @@ export function VocabularyManager({ initialItems, categories }: VocabularyManage
             </select>
           </div>
           <button className="secondary-button" type="submit" disabled={generating}>
-            {generating ? "Đang tạo..." : "Tạo bằng Gemini"}
+            {generating ? "Đang tạo..." : "Tạo bản demo"}
           </button>
         </form>
-        {error ? <p className="error-text">{error}</p> : <p className="muted">Muốn dùng Gemini, hãy lưu API key ở trang Cài đặt.</p>}
+        {error ? <p className="error-text">{error}</p> : <p className="muted">Phiên bản hiện tại tạo dữ liệu mẫu cục bộ để demo giao diện ổn định trên web.</p>}
       </section>
 
       <section className="panel table-panel span-full">
